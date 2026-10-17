@@ -1,0 +1,403 @@
+# Elisha Giles
+# Dungeons and Dragons Dungeon Crawl
+# IT-140 Project Two
+# AI Assistance: Co-pilot was used to help troubleshoot and format
+
+def show_instructions():
+    # Display the game introduction and available commands. #
+    print("DUNGEON CRAWL: THE SORCERESS'S LAIR")
+    print("Explore the dungeon, search for supplies, and prepare for the sorceress.")
+    print()
+    print("Movement: go north, go south, go east, go west")
+    print("Search a room: search")
+    print("Keep an item: get [item name]")
+    print("Equip an item: equip [item name]")
+    print("Leave an item: leave [item name]")
+    print("Check your status: status")
+    print("Exit the dungeon: exit or escape")
+    print()
+
+
+def show_room(current_room, rooms):
+    # Describe the room and show available exits. #
+    descriptions = {
+        "Entrance Hall": "You stand in the entrance hall of the dungeon.",
+        "Kitchen": "You enter a kitchen filled with tables, chairs, and ale barrels.",
+        "Bedroom": "You enter a sleeping chamber. The room is quiet and dusty.",
+        "Armory": "You enter an armory lined with weapon racks.",
+        "Treasure Room": "You enter a room filled with forgotten treasures.",
+        "Dungeon": "You descend into a dark, damp dungeon.",
+        "Sorceress's Office": "You enter the sorceress's private office."
+    }
+
+    print("\n" + descriptions[current_room])
+    print("Available exits:")
+
+    for direction in ["north", "south", "east", "west"]:
+        if direction in rooms[current_room]:
+            next_room = rooms[current_room][direction]
+
+            if next_room == "Sorceress's Office":
+                print(direction.capitalize() + " - " + next_room + " (FINAL ENCOUNTER)")
+            else:
+                print(direction.capitalize() + " - " + next_room)
+
+
+def show_status(current_room, inventory, equipped):
+    # Display the player's status when requested. #
+    print("\n---------- PLAYER STATUS ----------")
+    print("Current room:", current_room)
+    print("Inventory:", inventory)
+    print("Equipped items:", equipped)
+    print("-----------------------------------")
+
+
+def final_encounter(inventory, equipped):
+    #
+    Handle the final encounter with the sorceress.
+    Return 'escaped' if the player retreats to the Dungeon,
+    'won' if the player defeats or bribes the sorceress,
+    'lost' if the player is defeated,
+    or 'exit' if the player leaves the game.
+    #
+    print("\nThe sorceress smiles.")
+    print('"Another soul for my collection!"')
+
+    while True:
+        choice = input(
+            "Do you want to bribe the sorceress, fight, or run? "
+        ).strip().lower()
+
+        if choice in ["exit", "escape"]:
+            print("\nYou find your way out of the dungeon and escape to safety.")
+            print("Thanks for playing!")
+            return "exit"
+
+        if choice in ["bribe", "fight", "run"]:
+            break
+
+        print("Invalid choice. Enter bribe, fight, run, exit, or escape.")
+
+    if choice == "bribe":
+        if "bag of coins" in inventory:
+            print("The sorceress accepts your bag of coins.")
+            print("She allows you to leave the dungeon alive.")
+            print("You survived through negotiation!")
+            return "won"
+        else:
+            print('"If you wanted to bribe me you should\'ve brought money!"')
+
+            while True:
+                choice = input("Do you want to fight or run? ").strip().lower()
+
+                if choice in ["exit", "escape"]:
+                    print("\nYou find your way out of the dungeon and escape to safety.")
+                    print("Thanks for playing!")
+                    return "exit"
+
+                elif choice == "fight":
+                    break
+
+                elif choice == "run":
+                    print('"Run away coward! You\'ll be back..."')
+                    print("You escape the sorceress's office and retreat to the Dungeon.")
+                    print("You can collect more items and return when you are ready.")
+                    return "escaped"
+
+                else:
+                    print("Invalid choice. Enter fight, run, exit, or escape.")
+
+    elif choice == "run":
+        print('"Run away coward! You\'ll be back..."')
+        print("You escape the sorceress's office and retreat to the Dungeon.")
+        print("You can collect more items and return when you are ready.")
+        return "escaped"
+
+    # Combat begins here.
+    print("\nYou prepare to fight the sorceress!")
+
+    if "slurry of silverware" in equipped:
+        print('"Do you plan to fight me with knives and forks?!"')
+
+    has_sword = "sword" in equipped
+    has_shield = "shield" in equipped
+    has_armor = "studded leather armor" in equipped
+
+    # The player cannot fight without a sword.
+    if not has_sword:
+        print("The sorceress attacks you with a blast of dark magic!")
+
+        if has_shield or has_armor:
+            print("Your defensive equipment protects you from the worst of the attack.")
+            print("You cannot fight the sorceress without a sword.")
+
+            while True:
+                choice = input(
+                    "You must run! Enter 'run' to escape: "
+                ).strip().lower()
+
+                if choice in ["exit", "escape"]:
+                    print("\nYou find your way out of the dungeon and escape to safety.")
+                    print("Thanks for playing!")
+                    return "exit"
+
+                elif choice == "run":
+                    print('"Run away coward! You\'ll be back..."')
+                    print("You escape the sorceress's attack and retreat to the Dungeon.")
+                    print("You can collect more items and return when you are ready.")
+                    return "escaped"
+
+                else:
+                    print(
+                        "You cannot fight without a sword. "
+                        "Your options are run, exit, or escape."
+                    )
+
+        else:
+            print("You have no weapon or defensive equipment!")
+            print("The sorceress overwhelms you and devours your soul.")
+            print("GAME OVER!")
+            return "lost"
+
+    # Combat outcomes when the player has a sword.
+    if has_shield and has_armor:
+        print("Your sword, shield, and armor work perfectly together.")
+        print("You defeat the sorceress without issue!")
+        print("Congratulations! You survived the dungeon crawl.")
+
+    elif has_shield or has_armor:
+        print("You defeat the sorceress, but you are injured in the fight.")
+        print("You escape the dungeon, battered but alive!")
+        print("Congratulations! You survived the dungeon crawl.")
+
+    else:
+        print("You defeat the sorceress, but without defensive equipment,")
+        print("you suffer serious injuries during the battle.")
+        print("You escape the dungeon alive!")
+        print("Congratulations! You survived the dungeon crawl.")
+
+    return "won"
+
+
+def main():
+    # Run the dungeon crawl game. #
+
+    rooms = {
+        "Entrance Hall": {
+            "north": "Bedroom",
+            "east": "Armory",
+            "west": "Kitchen",
+            "south": "Dungeon",
+            "items": [],
+            "searched": False
+        },
+        "Kitchen": {
+            "east": "Entrance Hall",
+            "items": ["slurry of silverware"],
+            "searched": False
+        },
+        "Bedroom": {
+            "south": "Entrance Hall",
+            "east": "Treasure Room",
+            "items": ["studded leather armor"],
+            "searched": False
+        },
+        "Armory": {
+            "west": "Entrance Hall",
+            "items": ["sword", "shield"],
+            "searched": False
+        },
+        "Treasure Room": {
+            "west": "Bedroom",
+            "items": ["bag of coins"],
+            "searched": False
+        },
+        "Dungeon": {
+            "north": "Entrance Hall",
+            "east": "Sorceress's Office",
+            "items": [],
+            "searched": False
+        },
+        "Sorceress's Office": {
+            "items": [],
+            "searched": False
+        }
+    }
+
+    current_room = "Entrance Hall"
+    inventory = []
+    equipped = []
+    villain_room = "Sorceress's Office"
+    game_over = False
+
+    show_instructions()
+    show_room(current_room, rooms)
+
+    while not game_over:
+
+        # Start the encounter whenever the player enters the office.
+        if current_room == villain_room:
+            result = final_encounter(inventory, equipped)
+
+            if result == "escaped":
+                current_room = "Dungeon"
+                show_room(current_room, rooms)
+
+            else:
+                # Winning, losing, or exiting ends the game.
+                game_over = True
+
+            continue
+
+        command = input("\nWhat would you like to do? ").strip().lower()
+
+        # Let the player leave the dungeon from any room.
+        if command in ["exit", "escape"]:
+            print("\nYou find your way out of the dungeon and escape to safety.")
+            game_over = True
+
+        elif command == "status":
+            show_status(current_room, inventory, equipped)
+
+        elif command.startswith("go "):
+            direction = command[3:]
+
+            if direction in rooms[current_room]:
+                next_room = rooms[current_room][direction]
+
+                if next_room == villain_room:
+                    print(
+                        "\nWarning: You are about to enter the Sorceress's Office, "
+                        "where the final encounter begins."
+                    )
+
+                    confirm = input(
+                        "Are you ready to face the sorceress? (yes/no): "
+                    ).strip().lower()
+
+                    # Allow exit commands at the confirmation prompt too.
+                    if confirm in ["exit", "escape"]:
+                        print("\nYou find your way out of the dungeon and escape to safety.")
+                        game_over = True
+
+                    elif confirm == "yes":
+                        current_room = next_room
+                        show_room(current_room, rooms)
+
+                    else:
+                        print("You decide to prepare a little longer.")
+
+                else:
+                    current_room = next_room
+                    show_room(current_room, rooms)
+
+            else:
+                print("You cannot go that way.")
+
+        elif command == "search":
+            if rooms[current_room]["items"]:
+                rooms[current_room]["searched"] = True
+                print("You search the room and discover:")
+
+                for item in rooms[current_room]["items"]:
+                    print("-", item)
+
+                print("You may get, equip, or leave each item.")
+
+            elif rooms[current_room]["searched"]:
+                print("You have already searched this room. There is nothing left to find.")
+
+            else:
+                rooms[current_room]["searched"] = True
+                print("You search the room but find nothing.")
+
+        elif command.startswith("get "):
+            item_name = command[4:]
+            matching_item = None
+
+            if not rooms[current_room]["searched"]:
+                print("Search the room first.")
+
+            else:
+                for item in rooms[current_room]["items"]:
+                    if item.lower() == item_name:
+                        matching_item = item
+                        break
+
+                if matching_item:
+                    inventory.append(matching_item)
+                    rooms[current_room]["items"].remove(matching_item)
+                    print("You keep:", matching_item)
+
+                else:
+                    print("That item is not available here.")
+
+        elif command.startswith("equip "):
+            item_name = command[6:]
+            matching_item = None
+
+            if not rooms[current_room]["searched"]:
+                print("Search the room first.")
+
+            else:
+                for item in rooms[current_room]["items"]:
+                    if item.lower() == item_name:
+                        matching_item = item
+                        break
+
+                if matching_item:
+                    inventory.append(matching_item)
+                    rooms[current_room]["items"].remove(matching_item)
+                    equipped.append(matching_item)
+                    print("You equip:", matching_item)
+
+                elif item_name in inventory:
+                    if item_name in equipped:
+                        print("You already have that item equipped.")
+
+                    else:
+                        equipped.append(item_name)
+                        print("You equip:", item_name)
+
+                else:
+                    print("You must discover or keep that item first.")
+
+        elif command.startswith("leave "):
+            item_name = command[6:]
+            matching_item = None
+
+            if not rooms[current_room]["searched"]:
+                print("Search the room first.")
+
+            else:
+                for item in rooms[current_room]["items"]:
+                    if item.lower() == item_name:
+                        matching_item = item
+                        break
+
+                if matching_item:
+                    print("You leave behind:", matching_item)
+
+                elif item_name in inventory:
+                    inventory.remove(item_name)
+
+                    if item_name in equipped:
+                        equipped.remove(item_name)
+
+                    rooms[current_room]["items"].append(item_name)
+                    print("You leave behind:", item_name)
+
+                else:
+                    print("That item is not available to leave here.")
+
+        else:
+            print(
+                "Invalid command. Try moving, searching, getting an item, "
+                "equipping an item, leaving an item, checking status, or exiting."
+            )
+
+    print("\nThanks for playing! Hope you enjoyed the game.")
+
+
+if __name__ == "__main__":
+    main()
